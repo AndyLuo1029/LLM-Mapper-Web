@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/deviceModels")
@@ -32,10 +33,10 @@ public class DeviceModelController {
             DeviceModel deviceModel = deviceModelService.saveDeviceModel(deviceModelDTO);
 
             // 2. 调用生成函数，生成 mapper 并打包
-            String generatedFilePath = mapperGenerateService.generateMapperCode(deviceModelDTO.getName());
+            Path generatedFilePath = mapperGenerateService.generateMapperCode(deviceModelDTO.getName());
 
             // 3. 将打包文件路径存入数据库
-            deviceModel.setFilePath(generatedFilePath);
+            deviceModel.setFilePath(generatedFilePath.toString());
             deviceModel = deviceModelService.updateDeviceModelCodeFile(deviceModel);
 
             return ResponseEntity.status(201).body(deviceModel);

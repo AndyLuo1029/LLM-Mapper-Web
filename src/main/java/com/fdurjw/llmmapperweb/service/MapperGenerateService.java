@@ -16,7 +16,7 @@ public class MapperGenerateService {
      * 3. 打包 kubeedge/staging/src/github.com/kubeedge/<deviceName> 文件夹
      * 4. 返回zip文件的路径
      */
-    public String generateMapperCode(String deviceName) throws IOException, InterruptedException {
+    public Path generateMapperCode(String deviceName) throws IOException, InterruptedException {
 
         // 1. 赋予 generate.sh 脚本可执行权限
         chmodGenerateScript();
@@ -29,9 +29,13 @@ public class MapperGenerateService {
         // 获取当前工作目录（即项目根目录）
         String projectRoot = System.getProperty("user.dir");
 
-        // 3. 使用相对路径来构造文件路径
-        String folderToZip = projectRoot + "/kubeedge/" + deviceName;
-        String zipPath = projectRoot + "/mappers/" + deviceName + "_mapper.zip";
+        // 构造跨平台的路径
+        Path folderToZip = Paths.get(projectRoot, "kubeedge", deviceName);
+        Path zipPath = Paths.get(projectRoot, "mappers", deviceName + "_mapper.zip");
+
+        // 打印路径以确保正确性
+        System.out.println("Folder to zip: " + folderToZip);
+        System.out.println("Zip path: " + zipPath);
 
         zipFolder(folderToZip, zipPath);
 
@@ -41,14 +45,17 @@ public class MapperGenerateService {
 
     public void chmodGenerateScript() throws IOException, InterruptedException {
         // 获取当前工作目录（即项目根目录）
+        // 获取当前工作目录（即项目根目录）
         String projectRoot = System.getProperty("user.dir");
 
-        // 构造相对路径
-        String generateScriptPath = projectRoot + "/kubeedge/mapper-framework/hack/make-rules/generate.sh";
+        // 构造跨平台路径
+        Path generateScriptPath = Paths.get(projectRoot, "kubeedge", "mapper-framework", "hack", "make-rules", "generate.sh");
 
         // 使用 sudo -S 选项，通过标准输入传递密码
-        String command = "sudo -S chmod +x " + generateScriptPath;
+        String command = "sudo -S chmod +x " + generateScriptPath.toString();
 
+        // 输出命令以确保路径正确
+        System.out.println("Executing command: " + command);
         // 通过 ProcessBuilder 执行命令
         ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
         pb.redirectErrorStream(true);
@@ -85,11 +92,14 @@ public class MapperGenerateService {
         // 获取当前工作目录（即项目根目录）
         String projectRoot = System.getProperty("user.dir");
 
-        // 构造相对路径
-        File targetDir = new File(projectRoot + "/kubeedge/mapper-framework");
+        // 使用 Paths.get() 构造跨平台路径
+        Path targetDir = Paths.get(projectRoot, "kubeedge", "mapper-framework");
+
+        // 输出目标目录的路径以确保正确
+        System.out.println("Target directory: " + targetDir);
 
         // 设置 ProcessBuilder 的工作目录为相对路径
-        pb.directory(targetDir);
+        pb.directory(targetDir.toFile());
         // 将错误流合并到标准输出流，以便一起读取
         pb.redirectErrorStream(true);
 
@@ -138,18 +148,16 @@ public class MapperGenerateService {
      * @param sourceDirPath 待打包的文件夹路径
      * @param zipFilePath   生成的zip文件路径
      */
-    private void zipFolder(String sourceDirPath, String zipFilePath) throws IOException {
-        Path zipPath = Paths.get(zipFilePath);
+    private void zipFolder(Path sourceDirPath, Path zipFilePath) throws IOException {
         // 如果父级目录不存在需要先创建
-        Files.createDirectories(zipPath.getParent());
+        Files.createDirectories(zipFilePath.getParent());
 
-        try (ZipOutputStream zs = new ZipOutputStream(new FileOutputStream(zipFilePath))) {
-            Path sourcePath = Paths.get(sourceDirPath);
+        try (ZipOutputStream zs = new ZipOutputStream(new FileOutputStream(zipFilePath.toFile()))) {
             // walk遍历文件并过滤掉目录本身
-            Files.walk(sourcePath)
+            Files.walk(sourceDirPath)
                     .filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(sourcePath.relativize(path).toString());
+                        ZipEntry zipEntry = new ZipEntry(sourceDirPath.relativize(path).toString());
                         try {
                             zs.putNextEntry(zipEntry);
                             Files.copy(path, zs);
