@@ -26,8 +26,12 @@ public class MapperGenerateService {
 
         // 3. 打包指定的 mapper 目录到 zip
         System.out.println("Zipping files...");
-        String folderToZip = "/Users/andyluo/Documents/实验室/LLM-Mapper-Web/kubeedge/" + deviceName;
-        String zipPath = "/Users/andyluo/Documents/实验室/LLM-Mapper-Web/mappers/" + deviceName + "_mapper.zip";
+        // 获取当前工作目录（即项目根目录）
+        String projectRoot = System.getProperty("user.dir");
+
+        // 3. 使用相对路径来构造文件路径
+        String folderToZip = projectRoot + "/kubeedge/" + deviceName;
+        String zipPath = projectRoot + "/mappers/" + deviceName + "_mapper.zip";
 
         zipFolder(folderToZip, zipPath);
 
@@ -36,8 +40,14 @@ public class MapperGenerateService {
     }
 
     public void chmodGenerateScript() throws IOException, InterruptedException {
+        // 获取当前工作目录（即项目根目录）
+        String projectRoot = System.getProperty("user.dir");
+
+        // 构造相对路径
+        String generateScriptPath = projectRoot + "/kubeedge/mapper-framework/hack/make-rules/generate.sh";
+
         // 使用 sudo -S 选项，通过标准输入传递密码
-        String command = "sudo -S chmod +x /Users/andyluo/Documents/实验室/LLM-Mapper-Web/kubeedge/mapper-framework/hack/make-rules/generate.sh";
+        String command = "sudo -S chmod +x " + generateScriptPath;
 
         // 通过 ProcessBuilder 执行命令
         ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
@@ -72,8 +82,14 @@ public class MapperGenerateService {
     public void makeGenerate(String deviceName) throws IOException, InterruptedException {
         // 1. 在 mapper-framework 目录下执行 make generate
         ProcessBuilder pb = new ProcessBuilder("make", "generate");
-        pb.directory(new File("/Users/andyluo/Documents/实验室/LLM-Mapper-Web/kubeedge/mapper-framework"));
+        // 获取当前工作目录（即项目根目录）
+        String projectRoot = System.getProperty("user.dir");
 
+        // 构造相对路径
+        File targetDir = new File(projectRoot + "/kubeedge/mapper-framework");
+
+        // 设置 ProcessBuilder 的工作目录为相对路径
+        pb.directory(targetDir);
         // 将错误流合并到标准输出流，以便一起读取
         pb.redirectErrorStream(true);
 
