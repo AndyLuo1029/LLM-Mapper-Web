@@ -1,0 +1,43 @@
+{
+    "DEVICE_NAME": "adlight1",
+    "K8S_NODE": "kubeedge",
+    "PROTOCOL_NAME": "adlight - protocol",
+    "properties": [
+        {
+            "PROPERTY_NAME": "brightness",
+            "PROPERTY_TYPE": "STRING",
+            "PROPERTY_DESCRIP": "Brightness of the light",
+            "ACCESS_MODE": "ReadWrite",
+            "COLLECT_CYCLE": 1,
+            "REPORT_CYCLE": 1,
+            "REPORT_CLOUD": "true",
+            "DESIRED_VALUE": 0
+        },
+        {
+            "PROPERTY_NAME": "temperature",
+            "PROPERTY_TYPE": "FLOAT",
+            "PROPERTY_DESCRIP": "Temperature of the device",
+            "ACCESS_MODE": "ReadOnly",
+            "COLLECT_CYCLE": 1,
+            "REPORT_CYCLE": 1,
+            "REPORT_CLOUD": "false",
+            "DESIRED_VALUE": 2
+        }
+    ],
+    "actions": [
+        {
+            "ACTION_NAME": "setBrightness",
+            "ACTION_DESCRIP": "Set the brightness of the light",
+            "INPUT_SCHEMA": "{\"brightness\": 1}",
+            "OUTPUT_SCHEMA": "{\"brightness\": 1}"
+        }
+    ],
+    "events": [
+        {
+            "EVENT_NAME": "light_on",
+            "EVENT_DESCRIP": "Light is on",
+            "EVENT_SCHEMA": "{\"light_on\": true}"
+        }
+    ],
+    "CONFIG_DATA": "TBD"
+}
